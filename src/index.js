@@ -2,6 +2,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { createStore, applyMiddleware } from 'redux';
+import thunk from 'redux-thunk';
 
 // file imports
 import './index.css';
@@ -23,11 +24,21 @@ import rootReducer from './reducers';
 // a simpler way to write above commented code
 const logger = ({ dispatch, getState }) => (next) => (action) => {
   // middleware code
-  console.log('ACTION_TYPE = ', action.type);
+  // console.log('ACTION_TYPE = ', action.type);
   next(action);
 }
 
-const store = createStore(rootReducer, applyMiddleware(logger));
+// what the inbuilt package actually looks like 
+// const thunk = ({ dispatch, getState }) => (next) => (action) => {
+//   // middleware code
+//   if(typeof action === 'function'){
+//     action(dispatch);
+//     return;
+//   }
+//   next(action);
+// }
+
+const store = createStore(rootReducer, applyMiddleware(logger, thunk));
 console.log(store);
 // console.log('Before State', store.getState());
 
