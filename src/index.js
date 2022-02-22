@@ -26,7 +26,7 @@ const logger = ({ dispatch, getState }) => (next) => (action) => {
   // middleware code
   // console.log('ACTION_TYPE = ', action.type);
   next(action);
-}
+};
 
 // what the inbuilt package actually looks like 
 // const thunk = ({ dispatch, getState }) => (next) => (action) => {
@@ -61,6 +61,46 @@ class Provider extends React.Component {
     </StoreContext.Provider >
     );
 }
+}
+
+export function connect (callback) {
+  return function (Component) {
+    class ConnectedComponent extends React.Component {
+
+      constructor(props){
+        super(props);
+        this.unsubscribe = this.props.store.subscribe(() => {this.forceUpdate();});
+      }
+
+      componentWillUnmount() {
+        this.unsubscribe();
+      }
+
+      render() {
+        const {store} = this.props;
+
+        const state = store.getState();
+        const dataToBePassedAsProps = callback(state);
+
+        return <Component dispatch={store.dispatch} {...dataToBePassedAsProps} />;
+          
+      }
+    }
+
+    class ConnectedComponentWrapper extends React.Component {
+      render() {
+        return (
+          <StoreContext.Consumer>
+            {(store) => {
+              return <ConnectedComponent store={store}/>;
+            }}
+          </StoreContext.Consumer>
+        );
+      }
+    }
+
+    return ConnectedComponentWrapper;
+  };
 }
 
 ReactDOM.render(
